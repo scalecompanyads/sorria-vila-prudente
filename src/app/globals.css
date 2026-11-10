@@ -1,0 +1,429 @@
+@import "tailwindcss";
+
+/*
+ * Sorria Vila Prudente
+ * Azul cobalto e vermelho vêm da logo. Neutros levemente tingidos de azul.
+ */
+@theme {
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+
+  --color-blue: oklch(0.52 0.19 264); /* ~#2755CC, azul da logo */
+  --color-blue-deep: oklch(0.42 0.18 265);
+  --color-blue-soft: oklch(0.94 0.03 264);
+  --color-red: oklch(0.54 0.215 25); /* ~#CC1A2C, sorriso da logo */
+  --color-red-bright: oklch(0.64 0.23 26); /* vermelho para fundos escuros */
+  --color-night: oklch(0.2 0.075 266);
+  --color-night-2: oklch(0.26 0.09 266);
+  --color-ink: oklch(0.22 0.05 265);
+  --color-muted: oklch(0.45 0.03 262);
+  --color-paper: oklch(0.99 0.004 260);
+  --color-mist: oklch(0.965 0.014 262);
+  --color-line: oklch(0.9 0.02 262);
+  --color-wa: oklch(0.76 0.2 150); /* verde WhatsApp */
+
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+[id] {
+  scroll-margin-top: 5.5rem;
+}
+
+::selection {
+  background: var(--color-blue);
+  color: white;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-red-bright);
+  outline-offset: 3px;
+  border-radius: 0.5rem;
+}
+
+/* Tudo abaixo fica na camada `components` para que as utilities do Tailwind possam sobrescrever. */
+@layer components {
+/* ---------- Tipografia ---------- */
+.display {
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 1;
+  text-wrap: balance;
+}
+
+.h1 {
+  font-size: clamp(2.4rem, 1.4rem + 6.2vw, 6rem);
+}
+
+.h2 {
+  font-size: clamp(2.1rem, 1.3rem + 3.6vw, 3.9rem);
+}
+
+.lead {
+  font-size: clamp(1.05rem, 0.98rem + 0.4vw, 1.3rem);
+  line-height: 1.6;
+  max-width: 62ch;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+/* ---------- Sorriso (motivo da marca) ---------- */
+.smile-line {
+  position: absolute;
+  left: -2%;
+  bottom: -0.12em;
+  width: 104%;
+  height: 0.32em;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.smile-line {
+  clip-path: inset(-20% 100% -20% 0);
+  animation: draw 1s var(--ease-out-expo) 0.9s forwards;
+}
+
+@keyframes draw {
+  to {
+    clip-path: inset(-20% -2% -20% 0);
+  }
+}
+
+/* ---------- Entrada do hero ---------- */
+.rise {
+  opacity: 0;
+  transform: translateY(1.4rem);
+  animation: rise 0.9s var(--ease-out-expo) forwards;
+  animation-delay: calc(var(--i, 0) * 110ms + 150ms);
+}
+
+@keyframes rise {
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.hero-zoom {
+  animation: hero-zoom 14s ease-out forwards;
+}
+
+@keyframes hero-zoom {
+  from {
+    transform: scale(1.08);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+/* ---------- Revelar ao rolar (CSS puro, sem JS) ---------- */
+@supports (animation-timeline: view()) {
+  .reveal {
+    animation: reveal linear both;
+    animation-timeline: view();
+    animation-range: entry 5% entry 40%;
+  }
+  @keyframes reveal {
+    from {
+      opacity: 0;
+      transform: translateY(2rem);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+/* ---------- CTA WhatsApp ---------- */
+.btn-wa {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  background: var(--color-wa);
+  color: var(--color-night);
+  font-weight: 800;
+  line-height: 1.1;
+  border-radius: 999px;
+  transition:
+    transform 0.35s var(--ease-out-quart),
+    filter 0.35s var(--ease-out-quart);
+  animation: wa-pulse 2.6s ease-out infinite;
+}
+
+.btn-wa::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(100deg, transparent 30%, oklch(1 0 0 / 0.55) 50%, transparent 70%);
+  transform: translateX(-120%);
+  animation: wa-shine 3.8s ease-in-out 1.2s infinite;
+}
+
+.btn-wa:hover {
+  transform: translateY(-3px) scale(1.02);
+  filter: brightness(1.05);
+}
+
+.btn-wa:active {
+  transform: scale(0.98);
+}
+
+.btn-wa .wa-icon {
+  animation: wa-wiggle 4.2s ease-in-out 2s infinite;
+  transform-origin: 50% 70%;
+}
+
+.btn-wa .wa-arrow {
+  transition: transform 0.35s var(--ease-out-quart);
+}
+
+.btn-wa:hover .wa-arrow {
+  transform: translateX(5px);
+}
+
+@keyframes wa-pulse {
+  0% {
+    box-shadow:
+      0 0 0 0 oklch(0.76 0.2 150 / 0.6),
+      0 14px 34px -12px oklch(0.76 0.2 150 / 0.7);
+  }
+  70%,
+  100% {
+    box-shadow:
+      0 0 0 20px oklch(0.76 0.2 150 / 0),
+      0 14px 34px -12px oklch(0.76 0.2 150 / 0.7);
+  }
+}
+
+@keyframes wa-shine {
+  0%,
+  55% {
+    transform: translateX(-120%);
+  }
+  85%,
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+@keyframes wa-wiggle {
+  0%,
+  8%,
+  100% {
+    transform: rotate(0);
+  }
+  2% {
+    transform: rotate(-14deg);
+  }
+  4% {
+    transform: rotate(12deg);
+  }
+  6% {
+    transform: rotate(-8deg);
+  }
+}
+
+/* Botão flutuante */
+.fab-wa {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 3.75rem;
+  height: 3.75rem;
+  border-radius: 999px;
+  background: var(--color-wa);
+  color: var(--color-night);
+  box-shadow: 0 12px 30px -8px oklch(0.2 0.075 266 / 0.55);
+  transition: transform 0.35s var(--ease-out-quart);
+}
+
+.fab-wa:hover {
+  transform: scale(1.08);
+}
+
+.fab-wa::before,
+.fab-wa::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--color-wa);
+  z-index: -1;
+  animation: fab-ring 2.4s ease-out infinite;
+}
+
+.fab-wa::after {
+  animation-delay: 1.2s;
+}
+
+@keyframes fab-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+
+.fab-tip {
+  animation: tip-in 0.6s var(--ease-out-expo) 3s both;
+}
+
+@keyframes tip-in {
+  from {
+    opacity: 0;
+    transform: translateX(0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- Marquee ---------- */
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 38s linear infinite;
+}
+
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* ---------- Placeholder de imagem ---------- */
+.ph {
+  background:
+    radial-gradient(120% 90% at 20% 10%, oklch(0.5 0.17 264 / 0.55), transparent 60%),
+    radial-gradient(90% 80% at 90% 100%, oklch(0.54 0.2 25 / 0.35), transparent 55%),
+    linear-gradient(160deg, var(--color-night-2), var(--color-night));
+}
+
+.ph-grid {
+  background-image: linear-gradient(oklch(1 0 0 / 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, oklch(1 0 0 / 0.05) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+/* ---------- Carrossel horizontal ---------- */
+.snap-row {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.snap-row::-webkit-scrollbar {
+  display: none;
+}
+
+.snap-row > * {
+  scroll-snap-align: start;
+  flex: none;
+}
+
+/* ---------- FAQ ---------- */
+.faq summary {
+  list-style: none;
+}
+.faq summary::-webkit-details-marker {
+  display: none;
+}
+.faq details[open] .faq-plus {
+  transform: rotate(45deg);
+}
+.faq details[open] {
+  background: white;
+}
+
+/* ---------- Menu mobile ---------- */
+.menu-panel {
+  clip-path: inset(0 0 100% 0);
+  visibility: hidden;
+  transition:
+    clip-path 0.6s var(--ease-out-expo),
+    visibility 0s linear 0.6s;
+}
+
+.menu-panel[data-open="true"] {
+  clip-path: inset(0 0 0 0);
+  visibility: visible;
+  transition:
+    clip-path 0.6s var(--ease-out-expo),
+    visibility 0s;
+}
+
+.menu-item {
+  opacity: 0;
+  transform: translateY(1.2rem);
+  transition:
+    opacity 0.5s var(--ease-out-quart),
+    transform 0.6s var(--ease-out-expo);
+}
+
+.menu-panel[data-open="true"] .menu-item {
+  opacity: 1;
+  transform: none;
+  transition-delay: calc(var(--i, 0) * 60ms + 250ms);
+}
+
+/* ---------- Acessibilidade de movimento ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0s !important;
+    transition-duration: 0.001ms !important;
+  }
+  .rise,
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+  .marquee-track {
+    animation: none;
+  }
+}
+}
