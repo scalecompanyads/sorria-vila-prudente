@@ -4,46 +4,61 @@ import { resolveImage } from "@/lib/media";
 import { StarIcon } from "./icons";
 import WhatsAppButton from "./WhatsAppButton";
 
+// GIF transparente de 1px: fallback do <img> quando só existe imagem para um dos tamanhos,
+// assim o outro tamanho não baixa nada.
+const BLANK = "data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==";
+
+/**
+ * Fundo do hero com uma imagem para desktop e outra para mobile.
+ * Onde falta a imagem de um tamanho, aparece o placeholder só naquele tamanho.
+ */
 function HeroBackground() {
   const desktop = resolveImage("hero-desktop");
   const mobile = resolveImage("hero-mobile");
-  const d = desktop ?? mobile;
-  const m = mobile ?? desktop;
-
-  if (!d || !m) {
-    return (
-      <div className="ph absolute inset-0" aria-hidden="true">
-        <div className="ph-grid absolute inset-0" />
-        {/* Sorriso gigante da marca, só enquanto não há foto */}
-        <svg viewBox="0 0 400 200" className="absolute -bottom-[6%] -right-[12%] w-[130%] max-w-none text-red/50 md:-right-[6%] md:bottom-[-12%] md:w-[62%]" fill="none">
-          <path d="M20 40c60 130 300 130 360 0" stroke="currentColor" strokeWidth="46" strokeLinecap="round" />
-        </svg>
-        <p className="absolute bottom-3 right-28 hidden max-w-xs text-right font-mono text-[0.7rem] leading-relaxed text-white/45 md:block">
-          Adicionar imagem de fundo:
-          <br />
-          public/images/hero-desktop.jpg (1920 x 1080)
-          <br />
-          public/images/hero-mobile.jpg (900 x 1600)
-        </p>
-      </div>
-    );
-  }
 
   const common = { alt: "", fill: true, sizes: "100vw", priority: true, quality: 78 };
-  const {
-    props: { srcSet: desktopSet },
-  } = getImageProps({ ...common, src: d });
-  const {
-    props: { srcSet: mobileSet, ...rest },
-  } = getImageProps({ ...common, src: m });
+  const desktopProps = desktop ? getImageProps({ ...common, src: desktop }).props : null;
+  const mobileProps = mobile ? getImageProps({ ...common, src: mobile }).props : null;
+
+  // Em quais larguras o placeholder deve aparecer
+  const placeholder = desktop && mobile ? null : !desktop && !mobile ? "" : desktop ? "md:hidden" : "hidden md:block";
+  const missing = [!desktop && "hero-desktop.jpg (1920 x 1080)", !mobile && "hero-mobile.jpg (900 x 1600)"].filter(Boolean);
 
   return (
-    <picture>
-      <source media="(min-width: 768px)" srcSet={desktopSet} />
-      <source media="(max-width: 767px)" srcSet={mobileSet} />
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img {...rest} alt="" className="hero-zoom absolute inset-0 size-full object-cover" />
-    </picture>
+    <>
+      {placeholder !== null ? (
+        <div className={`ph absolute inset-0 ${placeholder}`} aria-hidden="true">
+          <div className="ph-grid absolute inset-0" />
+          {/* Sorriso gigante da marca, só enquanto não há foto */}
+          <svg viewBox="0 0 400 200" className="absolute -bottom-[6%] -right-[12%] w-[130%] max-w-none text-red/50 md:-right-[6%] md:bottom-[-12%] md:w-[62%]" fill="none">
+            <path d="M20 40c60 130 300 130 360 0" stroke="currentColor" strokeWidth="46" strokeLinecap="round" />
+          </svg>
+          <p className="absolute bottom-3 right-28 hidden max-w-xs text-right font-mono text-[0.7rem] leading-relaxed text-white/45 md:block">
+            Adicionar imagem de fundo:
+            {missing.map((m) => (
+              <span key={String(m)} className="block">
+                public/images/{m}
+              </span>
+            ))}
+          </p>
+        </div>
+      ) : null}
+
+      {desktopProps || mobileProps ? (
+        <picture>
+          {desktopProps ? <source media="(min-width: 768px)" srcSet={desktopProps.srcSet} /> : null}
+          {mobileProps ? <source media="(max-width: 767px)" srcSet={mobileProps.srcSet} /> : null}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            {...(mobileProps ?? desktopProps)!}
+            src={desktopProps && mobileProps ? mobileProps.src : BLANK}
+            srcSet={desktopProps && mobileProps ? mobileProps.srcSet : undefined}
+            alt=""
+            className="hero-zoom absolute inset-0 size-full object-cover"
+          />
+        </picture>
+      ) : null}
+    </>
   );
 }
 
